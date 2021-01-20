@@ -11,6 +11,7 @@ all_df_dict = np.load('./renta/my_file.npy',allow_pickle='TRUE').item()
 
 data = {}
 
+
 source = ColumnDataSource(data=all_df_dict['0']) 
 TOOLS = 'save,pan,box_zoom,reset,wheel_zoom'
 p = figure(title="Kernel de distribución de renta", y_axis_type="linear", plot_height = 400,
@@ -22,6 +23,9 @@ p.add_tools(HoverTool(tooltips=[("Renta", "@x"), ("Densidad", "@top")]))
 
 p.xaxis.axis_label = 'Renta'
 p.yaxis.axis_label = 'Densidad'
+
+
+
 
 
 def slider_update(attrname, old, new):
@@ -56,13 +60,13 @@ button.on_click(animate)
 layout = layout([
     [p],
     [slider, button],
-], sizing_mode='scale_width')
+], sizing_mode='fixed')
 
 
 curdoc().add_root(layout)
 curdoc().title = "Gapminder"
 
 """
-in terminal use: bokeh serve --show main.py
+in terminal use: bokeh serve --show myapp.py
 
 """
