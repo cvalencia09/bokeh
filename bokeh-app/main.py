@@ -19,11 +19,11 @@ p = figure(x_range=(1, 16), y_range=(0, 30),title="Kernel de distribución de re
 
 p.vbar(x = 'x', top = 'y', color = 'grey', width = np.min(np.abs(np.array(source.data['x'])[0:-2] - np.array(source.data['x'])[1:-1]))          , visible  = True, source = source)
 
-p.add_tools(HoverTool(tooltips=[("Renta", "@x"), ("Densidad", "@top")]))
+p.add_tools(HoverTool(tooltips=[("Renta", "@x"), ("Densidad", "@y")]))
 
-#plot.xaxis.ticker = SingleIntervalTicker(interval=0)
+#p.xaxis.ticker = SingleIntervalTicker(interval=0)
 p.xaxis.axis_label = 'Renta'
-#plot.yaxis.ticker = SingleIntervalTicker(interval=0)
+#p.yaxis.ticker = SingleIntervalTicker(interval=0)
 p.yaxis.axis_label = 'Densidad'
 
 def slider_update(attrname, old, new):
@@ -40,7 +40,7 @@ callback_id = None
 def animate_update():
     year = slider.value + 1
     if year > len(all_df_dict):
-        year = years[0]
+        year = 0
     slider.value = year
 
 def animate():
@@ -62,7 +62,7 @@ layout = layout([
 
 
 curdoc().add_root(layout)
-curdoc().title = "Gapminder"
+curdoc().title = "renta"
 
 """
 in terminal use: bokeh serve --show myapp.py
