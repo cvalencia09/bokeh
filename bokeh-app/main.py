@@ -1,89 +1,96 @@
-from os.path import join, dirname
-import datetime
-
 import pandas as pd
-from scipy.signal import savgol_filter
-
+import numpy as np
 from bokeh.io import curdoc
-from bokeh.layouts import row, column
-from bokeh.models import ColumnDataSource, DataRange1d, Select
-from bokeh.palettes import Blues4
+from bokeh.layouts import layout
+from bokeh.models import (Button, CategoricalColorMapper, ColumnDataSource,
+                          HoverTool, Label, SingleIntervalTicker, Slider)
+from bokeh.palettes import Spectral6
 from bokeh.plotting import figure
 
-STATISTICS = ['record_min_temp', 'actual_min_temp', 'average_min_temp', 'average_max_temp', 'actual_max_temp', 'record_max_temp']
+import os
+DIRECTORY_PATH = "./renta"
+files = [ file_path  for _, _, file_path in os.walk(DIRECTORY_PATH)]
+#for file_name in files[0]: #note that it has list of lists
+#    print(file_name)
 
-def get_dataset(src, name, distribution):
-    df = src[src.airport == name].copy()
-    del df['airport']
-    df['date'] = pd.to_datetime(df.date)
-    # timedelta here instead of pd.DateOffset to avoid pandas bug < 0.18 (Pandas issue #11925)
-    df['left'] = df.date - datetime.timedelta(days=0.5)
-    df['right'] = df.date + datetime.timedelta(days=0.5)
-    df = df.set_index(['date'])
-    df.sort_index(inplace=True)
-    if distribution == 'Smoothed':
-        window, order = 51, 3
-        for key in STATISTICS:
-            df[key] = savgol_filter(df[key], window, order)
+numberList = [item.replace('renta', '') for item in files[0]]
+numberList = [item.replace('.txt', '') for item in numberList]
+numberList = [int(item) for item in numberList]
 
-    return ColumnDataSource(data=df)
+numberList = np.array(numberList)
+#print("Min date = {:d}".format(numberList.min()))
+#print("Max date = {:d}".format(numberList.max()))
 
-def make_plot(source, title):
-    plot = figure(x_axis_type="datetime", plot_width=800, tools="", toolbar_location=None)
-    plot.title.text = title
+print("Min date = {min}, Max date = {max}.".format(min = numberList.min(), max = numberList.max()))
 
-    plot.quad(top='record_max_temp', bottom='record_min_temp', left='left', right='right',
-              color=Blues4[2], source=source, legend="Record")
-    plot.quad(top='average_max_temp', bottom='average_min_temp', left='left', right='right',
-              color=Blues4[1], source=source, legend="Average")
-    plot.quad(top='actual_max_temp', bottom='actual_min_temp', left='left', right='right',
-              color=Blues4[0], alpha=0.5, line_color="black", source=source, legend="Actual")
+all_df_dict = {}
+kk = 0 
+for file in files[0]:
+    filePath = 'C:/Users/cvale/Dropbox/BCCH/Proyecto_Renta/renta/' + file
+    df = pd.read_table(filePath, sep = ',')
+    all_df_dict.update({str(kk): df})
+    kk += 1
 
-    # fixed attributes
-    plot.xaxis.axis_label = None
-    plot.yaxis.axis_label = "Temperature (F)"
-    plot.axis.axis_label_text_font_style = "bold"
-    plot.x_range = DataRange1d(range_padding=0.0)
-    plot.grid.grid_line_alpha = 0.3
 
-    return plot
 
-def update_plot(attrname, old, new):
-    city = city_select.value
-    plot.title.text = "Weather data for " + cities[city]['title']
+data = {}
 
-    src = get_dataset(df, cities[city]['airport'], distribution_select.value)
-    source.data.update(src.data)
 
-city = 'Austin'
-distribution = 'Discrete'
+source = ColumnDataSource(data=all_df_dict['0']) 
+TOOLS = 'save,pan,box_zoom,reset,wheel_zoom'
+p = figure(title="Kernel de distribución de renta", y_axis_type="linear", plot_height = 400,
+           tools = TOOLS, plot_width = 800)
 
-cities = {
-    'Austin': {
-        'airport': 'AUS',
-        'title': 'Austin, TX',
-    },
-    'Boston': {
-        'airport': 'BOS',
-        'title': 'Boston, MA',
-    },
-    'Seattle': {
-        'airport': 'SEA',
-        'title': 'Seattle, WA',
-    }
-}
+p.vbar(x = 'x', top = 'y', color = 'grey', width = np.min(np.abs(np.array(source.data['x'])[0:-2] - np.array(source.data['x'])[1:-1]))          , visible  = True, source = source)
 
-city_select = Select(value=city, title='City', options=sorted(cities.keys()))
-distribution_select = Select(value=distribution, title='Distribution', options=['Discrete', 'Smoothed'])
+p.add_tools(HoverTool(tooltips=[("Renta", "@x"), ("Densidad", "@top")]))
 
-df = pd.read_csv(join(dirname(__file__), 'data/2015_weather.csv'))
-source = get_dataset(df, cities[city]['airport'], distribution)
-plot = make_plot(source, "Weather data for " + cities[city]['title'])
+p.xaxis.axis_label = 'Renta'
+p.yaxis.axis_label = 'Densidad'
 
-city_select.on_change('value', update_plot)
-distribution_select.on_change('value', update_plot)
 
-controls = column(city_select, distribution_select)
 
-curdoc().add_root(row(plot, controls))
-curdoc().title = "Weather"
+
+
+def slider_update(attrname, old, new):
+    year = slider.value
+    # label.text = str(year)
+    source.data = all_df_dict[str(year)]
+
+slider = Slider(start=0, end=len(all_df_dict) - 1, value=0, step=1, title="Year")
+slider.on_change('value', slider_update)
+
+callback_id = None
+
+
+def animate_update():
+    year = slider.value + 1
+    if year > len(all_df_dict):
+        year = years[0]
+    slider.value = year
+
+def animate():
+    global callback_id
+    if button.label == '► Play':
+        button.label = '❚❚ Pause'
+        callback_id = curdoc().add_periodic_callback(animate_update, 200)
+    else:
+        button.label = '► Play'
+        curdoc().remove_periodic_callback(callback_id)
+
+button = Button(label='► Play', width=60)
+button.on_click(animate)
+
+layout = layout([
+    [p],
+    [slider, button],
+], sizing_mode='scale_width')
+
+
+curdoc().add_root(layout)
+curdoc().title = "Gapminder"
+
+"""
+in terminal use: bokeh serve --show myapp.py
+
+"""
