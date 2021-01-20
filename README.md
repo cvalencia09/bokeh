@@ -14,6 +14,8 @@ This repository demonstrates how to run a Bokeh server from within Binder. To do
    ```
    https://mybinder.org/v2/gh/cvalencia09/bokeh/master?urlpath=/proxy/5006/bokeh-app
    https://mybinder.org/v2/gh/binder-examples/bokeh/master?urlpath=/proxy/5006/bokeh-app
+
+   https://arturomoncadatorres.com/creating-a-shareable-bokeh-dashboard-with-binder/
    ```
    
 When people click on the Binder link, they should be directed to the running Bokeh app.
