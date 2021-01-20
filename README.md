@@ -12,6 +12,7 @@ This repository demonstrates how to run a Bokeh server from within Binder. To do
 5. Created a Binder link that uses `urlpath` to point users to the port on which the Bokeh server will run:
 
    ```
+   https://mybinder.org/v2/gh/cvalencia09/bokeh/master?urlpath=/proxy/5006/bokeh-app
    https://mybinder.org/v2/gh/binder-examples/bokeh/master?urlpath=/proxy/5006/bokeh-app
    ```
    
