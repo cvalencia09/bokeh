@@ -1,6 +1,5 @@
 dependencies:
   - bokeh
-  - io
   - pandas
   - scipy
   - pip
