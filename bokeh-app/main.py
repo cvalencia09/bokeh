@@ -14,26 +14,24 @@ data = {}
 
 source = ColumnDataSource(data=all_df_dict['0']) 
 TOOLS = 'save,pan,box_zoom,reset,wheel_zoom'
-p = figure(title="Kernel de distribución de renta", y_axis_type="linear", plot_height = 400,
+p = figure(x_range=(1, 16), y_range=(0, 30),title="Kernel de distribución de renta", y_axis_type="linear", plot_height = 400,
            tools = TOOLS, plot_width = 800)
 
 p.vbar(x = 'x', top = 'y', color = 'grey', width = np.min(np.abs(np.array(source.data['x'])[0:-2] - np.array(source.data['x'])[1:-1]))          , visible  = True, source = source)
 
 p.add_tools(HoverTool(tooltips=[("Renta", "@x"), ("Densidad", "@top")]))
 
+#plot.xaxis.ticker = SingleIntervalTicker(interval=0)
 p.xaxis.axis_label = 'Renta'
+#plot.yaxis.ticker = SingleIntervalTicker(interval=0)
 p.yaxis.axis_label = 'Densidad'
-
-
-
-
 
 def slider_update(attrname, old, new):
     year = slider.value
     # label.text = str(year)
     source.data = all_df_dict[str(year)]
 
-slider = Slider(start=0, end=len(all_df_dict) - 1, value=0, step=1, title="Year")
+slider = Slider(start=0, end=len(all_df_dict) - 1, value=0, step=1, title="Date")
 slider.on_change('value', slider_update)
 
 callback_id = None
