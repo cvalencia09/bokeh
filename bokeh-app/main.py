@@ -7,34 +7,9 @@ from bokeh.models import (Button, CategoricalColorMapper, ColumnDataSource,
 from bokeh.palettes import Spectral6
 from bokeh.plotting import figure
 
-import os
-DIRECTORY_PATH = "./renta"
-files = [ file_path  for _, _, file_path in os.walk(DIRECTORY_PATH)]
-#for file_name in files[0]: #note that it has list of lists
-#    print(file_name)
-
-numberList = [item.replace('renta', '') for item in files[0]]
-numberList = [item.replace('.txt', '') for item in numberList]
-numberList = [int(item) for item in numberList]
-
-numberList = np.array(numberList)
-#print("Min date = {:d}".format(numberList.min()))
-#print("Max date = {:d}".format(numberList.max()))
-
-print("Min date = {min}, Max date = {max}.".format(min = numberList.min(), max = numberList.max()))
-
-all_df_dict = {}
-kk = 0 
-for file in files[0]:
-    filePath = 'C:/Users/cvale/Dropbox/BCCH/Proyecto_Renta/renta/' + file
-    df = pd.read_table(filePath, sep = ',')
-    all_df_dict.update({str(kk): df})
-    kk += 1
-
-
+all_df_dict = np.load('./renta/my_file.npy',allow_pickle='TRUE').item()
 
 data = {}
-
 
 source = ColumnDataSource(data=all_df_dict['0']) 
 TOOLS = 'save,pan,box_zoom,reset,wheel_zoom'
@@ -47,9 +22,6 @@ p.add_tools(HoverTool(tooltips=[("Renta", "@x"), ("Densidad", "@top")]))
 
 p.xaxis.axis_label = 'Renta'
 p.yaxis.axis_label = 'Densidad'
-
-
-
 
 
 def slider_update(attrname, old, new):
