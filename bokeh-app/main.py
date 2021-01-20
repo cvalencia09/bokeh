@@ -91,6 +91,6 @@ curdoc().add_root(layout)
 curdoc().title = "Gapminder"
 
 """
-in terminal use: bokeh serve --show myapp.py
+in terminal use: bokeh serve --show main.py
 
 """
